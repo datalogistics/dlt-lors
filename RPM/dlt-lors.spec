@@ -11,7 +11,7 @@ Source0:	%{name}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
 
 BuildRequires:	cmake gcc libtool autoconf automake wget libuuid-devel curl-devel openssl-devel jansson-devel libunis-c
-Requires:	cmake jansson-devel curl-devel openssl-devel libuuid-devel libunis-c libwebsockets 
+Requires:	jansson curl openssl libuuid libunis-c libwebsockets 
 
 %description
 LoRS (Logistical Runtime System) Library and Command Line Tools. The LoRS library is intended to be included in applications to give them access to exNodes and IBP storage. The LoRS library provides a high level of flexibility for dealing with the lower layers of the Network Storage Stack. The command line LoRS tools allow users to access many of the features provided by the C API without having to do any programming. In case of bug or issue please report it to data-logistics@googlegroups.org
