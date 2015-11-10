@@ -10,7 +10,7 @@ URL:	        https://github.com/datalogistics/dlt-lors
 Source0:	%{name}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
 
-BuildRequires:	cmake gcc libtool autoconf automake wget libuuid-devel zlib-devel curl-devel openssl-devel jansson-devel libunis-c
+BuildRequires:	cmake gcc libtool autoconf automake wget libuuid-devel zlib-devel curl-devel openssl-devel jansson-devel libunis-c popt-devel
 Requires:	jansson curl openssl libuuid libunis-c libwebsockets 
 
 %description
