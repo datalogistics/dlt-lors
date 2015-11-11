@@ -93,6 +93,7 @@ minigzip: minigzip.o $(LIBS)
 	$(CC) $(CFLAGS) -o $@ minigzip.o $(LDFLAGS)
 
 install: $(LIBS)
+	-@if [ ! -d $(prefix)  ]; then mkdir $(prefix); fi
 	-@if [ ! -d $(includedir)  ]; then mkdir $(includedir); fi
 	-@if [ ! -d $(libdir) ]; then mkdir $(libdir); fi
 	cp zlib.h zconf.h $(includedir)
