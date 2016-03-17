@@ -284,6 +284,16 @@ Depot *lbone_getDepots(Depot lboneServer, LBONE_request req, int timeout)
         }
         else
         {
+          if (IBP_MAX_HOSTNAME_LEN <= (strlen(host) + retval))
+          {
+            retval = IBP_MAX_HOSTNAME_LEN - strlen(host) - 1;
+
+            if (0 > retval)
+	    {
+ 	      retval = retval * (-1);
+            }
+          }
+
           strncat(host, host_temp, retval);
         }
         bytes_read += retval;
