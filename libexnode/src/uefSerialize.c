@@ -24,7 +24,7 @@
 
 #define  NO_OF_MAPPINGS 6
 
-const char *ibp_schema = "http://unis.incntre.iu.edu/schema/exnode/ext/ibp#";
+const char *ibp_schema = "http://unis.crest.iu.edu/schema/exnode/ext/ibp#";
 const char *uef_exnode_mapping[][2] = {
 	{"name", "filename"},
 	{"lorsversion", "lorsversion"},
@@ -132,8 +132,11 @@ int uefSerialize(Exnode *exnode, char **buf, size_t *len)
 			ptr = (ExnodeMetadata *)jval_v(jrbptr->val);
 			if(strcmp(ptr->name, "filename") == 0){ 
 				uefSerializeMetadata( ptr, "name", &exnode_obj); 
-			}else if(strcmp(ptr->name, "parent") == 0){  
-				uefSerializeMetadata( ptr, "parent", &exnode_obj); 
+			}else if(strcmp(ptr->name, "parent") == 0){
+			  json_t *pobj = json_object();
+			  json_object_set(pobj, "href", json_string(jval_s(ptr->val)));
+			  json_object_set(pobj, "rel", json_string("full"));
+			  json_object_set(exnode_obj, "parent", pobj);
 			}else if(strcmp(ptr->name, "created") == 0){  
 				uefSerializeMetadata( ptr, "created", &exnode_obj); 
 			}else if(strcmp(ptr->name, "modified") == 0){  
@@ -148,10 +151,9 @@ int uefSerialize(Exnode *exnode, char **buf, size_t *len)
 	
 	extent_arr = json_array();
 	dll_traverse(dllptr,exnode->mappings) {
-		uefSerializeMapping((ExnodeMapping *)jval_v(dllptr->val),	&extent_arr);
+		uefSerializeMapping((ExnodeMapping *)jval_v(dllptr->val), &extent_arr);
 	}
 	json_object_set(exnode_obj, "extents", extent_arr);
-	
 
 	temp = json_dumps(exnode_obj, JSON_INDENT(1));
 	if(temp == NULL){
@@ -161,6 +163,7 @@ int uefSerialize(Exnode *exnode, char **buf, size_t *len)
 	*len = strlen(temp) + sizeof(char);   // extra one byte for '\0'
 	*buf = (char *)malloc( (*len)  * sizeof(char));
 	strncpy(*buf, temp, *len);
+	
 	free(temp);
 
 	return(EXNODE_SUCCESS);
@@ -263,13 +266,13 @@ int uefDeserializeMapping(Exnode *exnode, json_t *extent)
 			}
 			
 			if((ret = json_object_get(value, "read")) != NULL){
-				read = json_string_value(ret);
+			  read = (char*)json_string_value(ret);
 			}
 			if((ret = json_object_get(value, "write")) != NULL){
-				write = json_string_value(ret);
+			  write = (char*)json_string_value(ret);
 			}
 			if((ret = json_object_get(value, "manage")) != NULL){
-				manage = json_string_value(ret);
+			  manage = (char*)json_string_value(ret);
 			}
 		}
 	}
@@ -300,14 +303,13 @@ int uefDeserialize(char *buf, int len, Exnode **exnode)
 	const char    *mode;
 	void          *iter;
 	size_t        index;
-
 	
 	err=exnodeCreateExnode(&temp);
 	if(err!=EXNODE_SUCCESS) {
 		return(err);
 	}
-
-	json_ret = json_loads(buf, 0 , &json_err);
+	
+	json_ret = json_loads(buf, 0, &json_err);
 	if(json_ret == NULL){
 		fprintf(stderr, "Could not decode JSON: %d: %s\n", json_err.line, json_err.text);
 		return (EXNODE_BADPARSE);

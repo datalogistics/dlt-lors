@@ -694,10 +694,8 @@ upload_partial:
     val.i = length;	
     exnodeSetMetadataValue(emd, "size", val, INTEGER, TRUE);
     // add parent id
-    fprintf(stderr, "Inserting parent .. \n");
     val.s = upload_dir_id == NULL ? "" : upload_dir_id;
     exnodeSetMetadataValue(emd, "parent", val, STRING, TRUE);
-    fprintf(stderr, "Inserting parent .. Sucessfull  \n");
     // add created 
     val.i = (long long)time(NULL);
     exnodeSetMetadataValue(emd, "created", val, INTEGER, TRUE);
