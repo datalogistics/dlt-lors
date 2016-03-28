@@ -1,6 +1,6 @@
 %define default_release 1
 Name: dlt-lors
-Version: 1.0
+Version: 1.1
 Release: %{?release}%{!?release:%{default_release}}
 Summary: LoRS Library and Command Line Tools
 
