@@ -6,7 +6,7 @@ AC_CANONICAL_SYSTEM
 
 dnl automake and header files
 AM_CONFIG_HEADER([config.h])
-AM_INIT_AUTOMAKE( [lors], [0.826] )
+AM_INIT_AUTOMAKE( [lors], [2.0] )
 AC_PREFIX_DEFAULT("`pwd`/local")
 AC_CONFIG_MACRO_DIR([config])
 
