@@ -1,7 +1,7 @@
 %define default_release 1
 Name: dlt-lors
 Version: 2.0
-Release: %{?release}%{!?release:%{default_release}}
+Release: %{?release}%{!?release:%{default_release}}%{?dist}
 Summary: LoRS Library and Command Line Tools
 
 Group:	        Application/System
