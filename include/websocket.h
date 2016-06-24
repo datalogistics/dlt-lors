@@ -7,9 +7,8 @@
 #define WEBSOCKET_SUCCESS 0
 #define WEBSOCKET_FAIL 1
 
-int websocket_init(struct libwebsocket_context **context, struct libwebsocket **wsi_dumb, char *host, char *path, int port, void *handle);
-int websocket_close(struct libwebsocket_context *context);
-
-
+int websocket_init(struct lws_context **context, struct lws **wsi_dumb, 
+                   char *host, char *path, int port, void *handle);
+int websocket_close(struct lws_context *context);
 
 #endif

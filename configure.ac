@@ -212,7 +212,7 @@ dnl check for libwebscokets package
 AC_ARG_WITH(libwebsockets, [--with-libwebsockets=path   path to libwebsockets], ,
             with_libwebsockets=no)
 if test "$with_libwebsockets" == "no"; then
-   AC_CHECK_LIB([websockets], [libwebsocket_create_context], ,AC_MSG_ERROR([Can not buiild without libwebsockets]))
+   AC_CHECK_LIB([websockets], [lws_create_context], ,AC_MSG_ERROR([Can not buiild without libwebsockets]))
 else
    AC_MSG_CHECKING( for libwebsockets)
    if test -f "$with_libwebsockets/include/libwebsockets.h"; then
