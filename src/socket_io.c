@@ -72,7 +72,7 @@ int socket_io_init(socket_io_handler *handle){
 	}
 
 	while (handle->status == CONN_WAITING) {
-        libwebsocket_service(handle->context, 50);
+        lws_service(handle->context, 50);
     }
 	
 	if(handle->status != CONN_CONNECTED){
@@ -95,14 +95,14 @@ int socket_io_init(socket_io_handler *handle){
 void static socket_io_emit_thread(socket_io_handler *handle){
 	
 	while(handle->status == CONN_CONNECTED){
-		libwebsocket_service(handle->context, 50);
+		lws_service(handle->context, 50);
 		//fprintf(stderr, " Last ping : %lld , current time : %lld , diff : %lld \n ", handle->last_ping, time(NULL), (time(NULL) - handle->last_ping));
 		if(handle->num_job > 0){ 
-			libwebsocket_callback_on_writable( handle->context, handle->wsi);
+			lws_callback_on_writable(handle->wsi);
 		}
 
 		if((time(NULL) - handle->last_ping) > PING_INTERVAL){
-			libwebsocket_callback_on_writable( handle->context, handle->wsi);
+			lws_callback_on_writable(handle->wsi);
 		}
 	}
 }

@@ -26,8 +26,8 @@ typedef enum _Event_type{
 } Event_type;
 
 typedef struct _socket_io_handler{
-	struct libwebsocket_context *context;
-	struct libwebsocket *wsi;
+	struct lws_context *context;
+	struct lws *wsi;
 	Conn_status status;
 	char *session_id;
 	char *server_add;

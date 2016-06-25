@@ -13,16 +13,17 @@
 #define ERROR(format, ...) fprintf(stderr, format "\n", ##__VA_ARGS__)
 
 
-int callback_socket_io(struct libwebsocket_context *context,
-					   struct libwebsocket *wsi,
-					   enum libwebsocket_callback_reasons reason, void *user,
-					   void *in, size_t len)
+int callback_socket_io(struct lws *wsi,
+                       enum lws_callback_reasons reason, void *user,
+                       void *in, size_t len)
 {
 	char              *buff;
 	char              *write_buff;
 	size_t             msgLen = 0;
 	socket_io_msg     *msg = NULL;
-	socket_io_handler *handle = libwebsocket_context_user(context);
+
+        struct lws_context *context = lws_get_context(wsi);
+	socket_io_handler *handle =lws_context_user(context);
 	char              *ping_msg = "2";
 
     switch(reason){
@@ -51,7 +52,7 @@ int callback_socket_io(struct libwebsocket_context *context,
 				// libwebsocket require extra pre and post buffer to put header and trailar in place
 				write_buff = malloc(msgLen + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING);
 				memcpy((write_buff + LWS_SEND_BUFFER_PRE_PADDING), buff, msgLen);
-				libwebsocket_write(wsi, (write_buff + LWS_SEND_BUFFER_PRE_PADDING), msgLen, LWS_WRITE_TEXT);
+				lws_write(wsi, (write_buff + LWS_SEND_BUFFER_PRE_PADDING), msgLen, LWS_WRITE_TEXT);
 				free(write_buff);
 				free(buff);
 				handle->last_ping = time(NULL);
@@ -61,7 +62,7 @@ int callback_socket_io(struct libwebsocket_context *context,
 			//fprintf(stderr, "Sending Ping packet\n");
 			write_buff = malloc(strlen(ping_msg) + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING);
 			memcpy((write_buff + LWS_SEND_BUFFER_PRE_PADDING), ping_msg, strlen(ping_msg));
-			libwebsocket_write(wsi, (write_buff + LWS_SEND_BUFFER_PRE_PADDING), strlen(ping_msg), LWS_WRITE_TEXT);
+			lws_write(wsi, (write_buff + LWS_SEND_BUFFER_PRE_PADDING), strlen(ping_msg), LWS_WRITE_TEXT);
 			free(write_buff);
 			handle->last_ping = time(NULL);
 		}
@@ -76,7 +77,7 @@ int callback_socket_io(struct libwebsocket_context *context,
     return 0;
 }
 
-static struct libwebsocket_protocols protocols[] = {
+static struct lws_protocols protocols[] = {
     {
         "socket_io",        // name
         callback_socket_io, // callback
@@ -86,15 +87,16 @@ static struct libwebsocket_protocols protocols[] = {
 };
 
 
-int websocket_init(struct libwebsocket_context **context, struct libwebsocket **wsi, char *host, char *path, int port, void *handle ){
+int websocket_init(struct lws_context **context, struct lws **wsi, 
+                   char *host, char *path, int port, void *handle ){
 	
-	struct libwebsocket_context *c;
-	struct libwebsocket *w;
+	struct lws_context *c;
+	struct lws *w;
 	const char *interface = NULL;
-    const char *cert_path = NULL;
-    const char *key_path = NULL;
+        const char *cert_path = NULL;
+        const char *key_path = NULL;
    	int use_ssl = 0;
-    int opts = 0;
+        int opts = 0;
 	int ietf_version = -1; 
 	struct lws_context_creation_info info;
 
@@ -112,7 +114,7 @@ int websocket_init(struct libwebsocket_context **context, struct libwebsocket **
     info.port = CONTEXT_PORT_NO_LISTEN;
     info.iface = interface;
     info.protocols = protocols;
-    info.extensions = libwebsocket_get_internal_extensions();
+    info.extensions = NULL;
     info.ssl_cert_filepath = NULL;
     info.ssl_private_key_filepath = NULL;
     info.gid = -1;
@@ -127,14 +129,26 @@ int websocket_init(struct libwebsocket_context **context, struct libwebsocket **
 	lws_set_log_level(LLL_ERR, NULL);
 
 	// create libwebsockets context
-	*context = libwebsocket_create_context(&info);
-    if (context == NULL) {
-        ERROR("libwebsocket init failed");
-        return WEBSOCKET_FAIL;
-    }
+	*context = lws_create_context(&info);
+        if (context == NULL) {
+          ERROR("libwebsocket init failed");
+          return WEBSOCKET_FAIL;
+        }
 	
 	// connect to handle
-	*wsi = libwebsocket_client_connect(*context, host, port, use_ssl, path, host, host, NULL, ietf_version);
+        struct lws_client_connect_info connect_info;
+        memset(&connect_info, 0, sizeof(connect_info));
+        connect_info.context = *context;
+        connect_info.address = host;
+        connect_info.port = port;
+        connect_info.ssl_connection = use_ssl; 
+        connect_info.path = path;
+        connect_info.host = host;
+        connect_info.origin = host;
+        connect_info.protocol = NULL;
+        connect_info.ietf_version_or_minus_one = ietf_version;
+
+	*wsi = lws_client_connect_via_info(&connect_info);
 	if(wsi == NULL){
 		ERROR("libwebsocket connect failed");
 		return WEBSOCKET_FAIL;
@@ -143,7 +157,7 @@ int websocket_init(struct libwebsocket_context **context, struct libwebsocket **
 	return WEBSOCKET_SUCCESS;
 }
 
-int websocket_close(struct libwebsocket_context *context){
-	libwebsocket_context_destroy(context);
+int websocket_close(struct lws_context *context){
+	lws_context_destroy(context);
 	return WEBSOCKET_SUCCESS;
 }
